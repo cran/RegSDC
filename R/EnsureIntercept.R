@@ -4,8 +4,9 @@
 #' @param nRow Expected number of rows
 #' @param nCol Expected number of columns
 #'
-#' @return
+#' @return Input as a matrix 
 #' @export
+#' @author Øyvind Langsrud
 #' @keywords internal
 #'
 #' @examples
@@ -46,6 +47,7 @@ EnsureMatrix <- function(x, nRow = NULL, nCol = NULL) {
 #'
 #' @return The input matrix possibly with a column of ones added
 #' @export
+#' @author Øyvind Langsrud
 #' @keywords internal
 #'
 #' @examples

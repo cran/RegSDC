@@ -13,6 +13,9 @@ EnsureMatrix(x, nRow = NULL, nCol = NULL)
 
 \item{nCol}{Expected number of columns}
 }
+\value{
+Input as a matrix
+}
 \description{
 Ensure that input is matrix (by as.matrix) and check number of rows (and columns)
 }
@@ -28,5 +31,8 @@ try(EnsureMatrix(1:3, 4))
 EnsureMatrix(x, 3, 2)
 try(EnsureMatrix(x, 3, 3))
 try(EnsureMatrix(NULL, 3, 3))
+}
+\author{
+Øyvind Langsrud
 }
 \keyword{internal}

@@ -11,6 +11,7 @@
 #' @param lambda ROMM parameter
 #' @param makeunique Parameter to be used in GenQR 
 #' @param ensureIntercept Whether to ensure/include a constant term. Non-NULL x is subjected to \code{\link{EnsureIntercept}}
+#' @param returnParts Alternative output two matrices: yHat (fitted) and yRes (generated residuals).
 #' 
 #' @details doSVD has effect on decomposition of y and yNew. Input matrices are subjected to \code{\link{EnsureMatrix}}.
 #' 
@@ -18,18 +19,28 @@
 #' @keywords internal
 #' @importFrom stats rnorm
 #' @export
+#' @author Øyvind Langsrud
 #'
 #' @examples
 #' exY <- matrix(rnorm(15), 5, 3)
 #' RegSDCgen(exY)
 #' RegSDCgen(exY, yNew = exY + 0.001 * matrix(rnorm(15), 5, 3))  # Close to exY
 #' RegSDCgen(exY, lambda = 0.001)  # Close to exY
-RegSDCgen <- function(y, x = NULL, doSVD = FALSE, yNew = NULL, lambda = Inf, makeunique = TRUE, ensureIntercept = TRUE) {
+RegSDCgen <- function(y, x = NULL, doSVD = FALSE, yNew = NULL, lambda = Inf, makeunique = TRUE, 
+                      ensureIntercept = TRUE, returnParts = FALSE) {
   y <- EnsureMatrix(y)
   x <- EnsureMatrix(x, nrow(y))
   if(ensureIntercept)
     x <- EnsureIntercept(x)
   xQ <- GenQR(x, findR = FALSE)
+  
+  if (NROW(xQ) == NCOL(xQ)) {
+    if (returnParts) 
+      return(list(yHat = y, yRes = 0 * y)) 
+    else 
+      return(y)
+  }
+  
   yHat <- xQ %*% (t(xQ) %*% y)
   # makeunique <- !is.null(yNew)
   eQR <- GenQR(y - yHat, doSVD = doSVD, makeunique = makeunique)
@@ -48,6 +59,12 @@ RegSDCgen <- function(y, x = NULL, doSVD = FALSE, yNew = NULL, lambda = Inf, mak
   eSimQ <- GenQR(eSim, doSVD = doSVD, findR = FALSE, makeunique = makeunique)
   if (NCOL(eSimQ) > m) 
     eSimQ <- eSimQ[, seq_len(m), drop = FALSE]
+  if(!is.null(rownames(y))){
+    rownames(yHat) <- rownames(y)
+    rownames(eSimQ) <- rownames(y)
+  }
+  if (returnParts)
+    return(list(yHat = yHat, yRes = eSimQ %*% eQR$R))
   yHat + eSimQ %*% eQR$R
 }
 
@@ -67,6 +84,7 @@ RegSDCgen <- function(y, x = NULL, doSVD = FALSE, yNew = NULL, lambda = Inf, mak
 #' 
 #' @return Generated version of y
 #' @export
+#' @author Øyvind Langsrud
 #'
 #' @examples
 #' x <- matrix(1:5, 5, 1)
@@ -102,6 +120,7 @@ RegSDCipso <- function(y, x = NULL, ensureIntercept = TRUE) {
 #' 
 #' @return Generated version of y
 #' @export
+#' @author Øyvind Langsrud
 #'
 #' @examples
 #' x <- matrix(1:5, 5, 1)
@@ -137,6 +156,7 @@ RegSDCnew <- function(y, yNew, x = NULL, doSVD = FALSE, ensureIntercept = TRUE) 
 #' 
 #' @return Generated version of y
 #' @export
+#' @author Øyvind Langsrud
 #'
 #' @examples
 #' x <- matrix(1:5, 5, 1)
