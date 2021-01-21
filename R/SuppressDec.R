@@ -6,11 +6,13 @@
 #' Assuming correct suppression, this function will generate safe inner cell frequencies as decimal numbers.
 #' 
 #' This function makes use of \code{\link{ReduceX}} and \code{\link{RegSDCipso}}.
+#' It is not required that \code{y} consists of cell frequencies. A multivariate \code{y} or \code{z} is also possible. 
+#' Then several values are possible as \code{digits}, \code{resScale} and \code{rmse} input. 
 #' 
 #'
 #' @param x Dummy matrix where the dimensions matches z and/or y input. Sparse matrix (Matrix package) is possible.
 #' @param z Frequencies to be published. All, only the safe ones or with suppressed as NA.
-#' @param y Inner cell frequencies.
+#' @param y Inner cell frequencies (see details).
 #' @param suppressed Logical vector defining the suppressed elements of z.
 #' @param digits Output close to whole numbers will be rounded using \code{digits} as input to \code{\link{RoundWhole}}.
 #' @param nRep Integer, when >1, several y's will be generated. Extra columns in output.
@@ -22,6 +24,7 @@
 #' @note Capital letters, X, Y and Z, are used in the paper.
 #'
 #' @return The inner cell frequencies as decimal numbers
+#' @importFrom SSBtools RoundWhole
 #' @export
 #' @author Øyvind Langsrud
 #'
@@ -77,7 +80,7 @@ SuppressDec <- function(x, z = NULL, y = NULL, suppressed = NULL, digits = 9, nR
     if (is.null(z)) {
       suppr <- rep(FALSE, NCOL(x))
     } else {
-      suppr <- is.na(z)
+      suppr <- is.na(z[, 1])
     }
   }
   
@@ -121,7 +124,7 @@ SuppressDec <- function(x, z = NULL, y = NULL, suppressed = NULL, digits = 9, nR
       rw <- RoundWhole(IpsoExtra(y = a$y[which(!a$yKnown), , drop = FALSE], x = a$x, nRep = nRep, 
                                ensureIntercept = FALSE, rmse = rmse, resScale = resScale), digits = digits)
     } else {
-      yDeduct <- EnsureMatrix(yDeduct[which(!a$yKnown)])
+      yDeduct <- EnsureMatrix(yDeduct)[which(!a$yKnown), , drop = FALSE]
       rw <- RoundWhole(IpsoExtra(y = a$y[which(!a$yKnown), , drop = FALSE] - yDeduct, x = a$x, nRep = nRep, 
                                  ensureIntercept = FALSE, rmse = rmse, resScale = resScale), digits = digits)
       if (nRep != 1)
@@ -207,46 +210,12 @@ Z2Yhat <- function(z, x, digits = 9) {
   yHat <- crossprod(ginv(as.matrix(x)), z)
   if(!is.null(rownames(x)))
     rownames(yHat) <- rownames(x)
-  if (!is.null(digits)) 
-    if (!is.na(digits)) 
-      yHat <- RoundWhole(yHat, digits = digits)
-  yHat
+  # if (!is.null(digits))    # Taken care of in RoundWhole 
+  #   if (!is.na(digits[1])) # Taken care of in RoundWhole
+  # yHat <- RoundWhole(yHat, digits = digits)
+  # yHat
+  RoundWhole(yHat, digits = digits)
 }
-
-
-
-
-#' Round values that are close two whole numbers
-#'
-#' @param x vector or matrix
-#' @param digits parameter to \code{\link{round}}
-#' @param onlyZeros Only round values close to zero 
-#'
-#' @return Modified x
-#' @export
-#' @author Øyvind Langsrud
-#' @keywords internal 
-#'
-#' @examples
-#' x <- c(0.0002, 1.00003, 3.00014)
-#' RoundWhole(x)     # No values rounded
-#' RoundWhole(x, 4)  # One value rounded
-#' RoundWhole(x, 3)  # All values rounded
-#' RoundWhole(x, 3, TRUE)  # One value rounded
-RoundWhole <- function(x, digits = 9, onlyZeros = FALSE) {
-  if (is.null(digits))
-    return(x)
-  round_x <- round(x)
-  round_x_digits <- round(x, digits = digits)
-  if (onlyZeros) 
-    toWhole <- round_x_digits == 0 
-  else 
-    toWhole <- round_x == round_x_digits
-  toWhole[is.na(toWhole)] <- FALSE
-  x[toWhole] <- round_x[toWhole]
-  x
-}
-
 
 
 
@@ -345,9 +314,9 @@ ReduceX <- function(x, z = NULL, y = NULL, digits = 9) {
   if (yNULL) {
     if (length(yKnown1_0))
       yHat[yKnown1_0, ] <- Z2Yhat(z, x, digits = NA)
-    if (!is.null(digits))
-      if (!is.na(digits)) 
-        yHat <- RoundWhole(yHat, digits = digits)
+    #if (!is.null(digits))    Taken care of in RoundWhole 
+    #  if (!is.na(digits[1])) ----- // -----
+    yHat <- RoundWhole(yHat, digits = digits)
   } else {
     yHat <- y
   }
@@ -370,7 +339,7 @@ ReduceX <- function(x, z = NULL, y = NULL, digits = 9) {
 #' @param digits Digits used to detect perfect fit (caused by fitted values as input). 
 #'      This checking will be done only when rmse is in input. When perfect fit, rmse will be used instead of resScale.
 #' @param rmse Desired root mean square error (residual standard error). Will be used when resScale is 
-#'          NULL or cannot be used (see parameter digits). This parameter is possible only when single y variable. 
+#'          NULL or cannot be used (see parameter digits). This parameter forces the rmse value for one y variable (the first). 
 #'
 #' @return Generated version of y
 #' @export
@@ -404,9 +373,9 @@ IpsoExtra <- function(y, x = NULL, ensureIntercept = TRUE, returnParts = FALSE, 
     x <- EnsureIntercept(x)
   xQ <- GenQR(x, findR = FALSE)
   
-  if (!is.null(rmse)) 
-    if (NCOL(y) > 1) 
-      stop("rmse parameter only when single y")
+  #if (!is.null(rmse)) 
+  #  if (NCOL(y) > 1) 
+  #    stop("rmse parameter only when single y")
   
   if (NROW(xQ) == NCOL(xQ)) {
     if (!is.null(resScale) | !is.null(rmse)) 
@@ -420,14 +389,19 @@ IpsoExtra <- function(y, x = NULL, ensureIntercept = TRUE, returnParts = FALSE, 
   yHat <- xQ %*% (t(xQ) %*% y)
   
   n <- NROW(y)
+  ncoly <- NCOL(y)
   
   eQRR <- NULL
   if (!is.null(digits) & !is.null(resScale)) {
     if (!is.null(rmse)) 
       if (max(abs(round(y - yHat, digits = digits))) == 0) {
-        warning("rmse used instead of resScal since perfect fit.")
+        if (ncoly > 1){
+          warning("rmse with identical residual vectors used instead of resScal since perfect fit.")
+        } else {
+          warning("rmse used instead of resScal since perfect fit.")
+        }
         resScale <- NULL
-        eQRR <- matrix(1, 1, 1)  # Changed below
+        eQRR <- matrix(1, 1, ncoly)  # Changed below
         m <- 1L
       }
   }
@@ -436,6 +410,16 @@ IpsoExtra <- function(y, x = NULL, ensureIntercept = TRUE, returnParts = FALSE, 
     eQRR <- GenQR(y - yHat, makeunique = TRUE)$R
     m <- NROW(eQRR)
   }
+  
+  
+  if (!is.null(rmse)) 
+    if (ncoly > 1){ 
+      rmseVar <- match(TRUE,!is.na(rmse))
+      rmse <- rmse[rmseVar] 
+      resScale <- rmse * sqrt((n - NCOL(xQ))/sum(eQRR[, rmseVar]^2)) 
+    }
+  
+  
   if (!is.null(resScale)) {
     eQRR <- resScale * eQRR
   } else {
@@ -453,8 +437,9 @@ IpsoExtra <- function(y, x = NULL, ensureIntercept = TRUE, returnParts = FALSE, 
     eSimQ <- GenQR(eSim, findR = FALSE, makeunique = TRUE)
     if (nRep == 1) 
       yRes <- eSimQ %*% eQRR 
-    else 
-      yRes[, SeqInc(1 + m * (i - 1), m * i)] <- eSimQ %*% eQRR
+    else {
+      yRes[, SeqInc(1 + ncoly * (i - 1), ncoly * i)] <- eSimQ %*% eQRR
+    }
   }
   if(!is.null(rownames(y))){
     rownames(yHat) <- rownames(y)

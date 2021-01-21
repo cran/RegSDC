@@ -1,6 +1,6 @@
-c5289391ddf10cacbbe10a17c77567d6 *DESCRIPTION
+fb5b629f2494f2b17e427ce97feb6551 *DESCRIPTION
 715f3348ed8b9bf4fac3b08133384a4d *LICENSE
-a2523940e6ac08086fe3fb9c7285342d *NAMESPACE
+0594fe02201e2e0727b1cfa56b140041 *NAMESPACE
 7d990c6618f6dcbe877218dc95b1fd3e *R/CalculateC.R
 30e5763bf96e0d666d9f7dee90fbcfc6 *R/Cdiff.R
 49445d238131c3c8c6f87e609fd8ce0f *R/EnsureIntercept.R
@@ -10,14 +10,14 @@ fd9476beadccd565c036eb9e099f6e1e *R/RegSDCcomp.R
 aa9d5f4fffdf06e77c1e43ead5e04383 *R/RegSDCdata.R
 8346aecb7f461ad49968997938ae872c *R/RegSDCgen.R
 d713ffa57abec967112e14137edbe6c6 *R/RegSDChybrid.R
-37fcc2041054e5dbcdf1f7840b3a146d *R/SuppressDec.R
+d25b4e552a209323fb24db83390d2892 *R/SuppressDec.R
 6988eadb4c20616e2c28a71efa49c530 *man/CalculateC.Rd
 374747a99b5f8f6fadf6a595081c51cb *man/Cdiff.Rd
 7a2abaabcb4fba75352403e4564ac71b *man/EnsureIntercept.Rd
 81a4e3a102344a59c41dba52e7ecdd0b *man/EnsureMatrix.Rd
 58f9dc3e29cbc0d84012954124832591 *man/FindAlpha.Rd
 99e94d9ea3de5a0d524d181e71007e23 *man/GenQR.Rd
-b68c1192cd1b5b6b4dd6f74882afebec *man/IpsoExtra.Rd
+5ae4bc4c4699d5a37ff69cbb7fc72e0a *man/IpsoExtra.Rd
 0f4499c227ec221f7100ecfdee40c7a8 *man/ReduceX.Rd
 d4ffd1d2122b1f66a05d0efa25c17743 *man/RegSDCadd.Rd
 37339370aabbe29c36696804be0e9305 *man/RegSDCaddGen.Rd
@@ -28,6 +28,5 @@ ee7341df91a9ce89f2b8a7d51f0c2933 *man/RegSDCgen.Rd
 c5f044b866d695cf442f6baf685a3c9f *man/RegSDCipso.Rd
 6ec60b8cca835c0e68250b92a9e4c8c4 *man/RegSDCnew.Rd
 9d30812d6fcdcf01af7f28a65b0d97f8 *man/RegSDCromm.Rd
-eb990562a3c76c6af1b9c541c3ba29d3 *man/RoundWhole.Rd
-418236e873178f0b080a0996b0ec4c62 *man/SuppressDec.Rd
+2239a690ea55627d17f7a50c19af4d73 *man/SuppressDec.Rd
 551bffb86e9c7257c4f111976ef31652 *man/Z2Yhat.Rd
